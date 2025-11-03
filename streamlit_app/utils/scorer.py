@@ -23,6 +23,12 @@ nltk.data.path.append(NLTK_DATA_DIR)
 @st.cache_resource
 def load_models():
     """Loads all models into memory."""
+    
+    # --- THIS IS THE FIX ---
+    # Tell NLTK to download the 'punkt' tokenizer data
+    nltk.download('punkt')
+    # -----------------------
+    
     print("Loading models...")
     base_dir = os.path.dirname(__file__)
     model_path = os.path.join(base_dir, '..', 'models', 'quality_model.pkl')
