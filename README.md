@@ -1,24 +1,19 @@
 # SEO Content Quality & Duplicate Detector
 
-This project is a complete machine learning pipeline built for a data science case study. It ingests a dataset of webpage content, engineers advanced NLP features, and trains a robust classification model to score content quality (Low, Medium, High). It also includes a real-time analysis function to score and check for duplicates on any live URL.
+This project is a complete machine learning pipeline that analyzes web content for SEO quality and detects duplicate articles. It ingests raw HTML, engineers advanced NLP features, trains a robust classifier, and serves the results in a real-time Streamlit application.
 
 
 
 ## 🚀 Key Features
-* **HTML Parsing:** Efficiently parses raw HTML to extract clean, readable body text and titles.
-* **Advanced Feature Engineering:** Goes beyond basic word count to engineer 7 distinct features, including:
-    * Readability Scores (Flesch Ease, Gunning Fog)
-    * Lexical Complexity (Avg. Sentence Length)
-    * Interaction Terms (Readability * Word Count)
+* **HTML Parsing:** Efficiently parses raw HTML to extract clean, readable body text.
+* **Advanced Feature Engineering:** Engineers 7 distinct features, including readability scores (Flesch, Gunning Fog) and interaction terms (`readability * word_count`).
 * **Semantic Duplicate Detection:** Uses `Sentence-Transformers` (S-BERT) to find *semantically similar* content, which is far more powerful than basic keyword matching.
-* **Robust Quality Scoring:** Employs a `Support Vector Classifier (SVC)` model, hypertuned with `GridSearchCV`, to accurately predict content quality.
-* **Real-Time Analysis:** A single function `analyze_url(url)` can scrape, parse, and score any live URL in seconds.
+* **Robust Quality Scoring:** Employs a hypertuned `Support Vector Classifier (SVC)` model to accurately predict content quality (Low, Medium, High).
+* **Real-Time Analysis:** A single function (and Streamlit app) can scrape, parse, and score any live URL in seconds.
 
 ---
 
 ## 🔧 Setup & Installation
-
-To run this project locally, follow these steps:
 
 1.  **Clone the Repository:**
     ```bash
@@ -26,41 +21,45 @@ To run this project locally, follow these steps:
     cd seo-content-detector
     ```
 
-2.  **Create a Virtual Environment:**
+2.  **Create & Activate Virtual Environment:**
     ```bash
+    # Create
     python -m venv venv
     
-    # On Windows
+    # Activate (Windows)
     .\venv\Scripts\activate
-    
-    # On macOS/Linux
-    source venv/bin/activate
     ```
 
 3.  **Install Dependencies:**
-    All required packages are listed in `requirements.txt`.
     ```bash
-    pip install -r requirements.txt
+    # Use the venv's python to install
+    .\venv\Scripts\python.exe -m pip install -r requirements.txt
     ```
-
 4.  **Download NLTK Data:**
-    The pipeline requires the 'punkt' tokenizer. The notebook will automatically download this to a local `nltk_data` folder on first run.
+    The pipeline automatically downloads the 'punkt' tokenizer to a local `nltk_data` folder on first run.
 
 ---
 
 ## 🏃 Quick Start
 
-The entire pipeline and all analysis are contained within a single Jupyter Notebook.
+### 1. Jupyter Notebook
+The main analysis and model training pipeline is in the notebook.
 
 1.  **Launch Jupyter:**
     ```bash
     jupyter notebook
     ```
-2.  **Open the Notebook:**
-    Navigate to `notebooks/` and open `seo_pipeline.ipynb`.
+2.  **Open and Run:**
+    Navigate to `notebooks/` and open `seo_pipeline.ipynb`. Click `Kernel > Restart & Run All`.
 
-3.  **Run All Cells:**
-    Click `Kernel > Restart & Run All` to execute the full pipeline from data parsing to model training and the final real-time demo.
+### 2. Streamlit Web App
+To run the interactive web demo locally:
+
+1.  **Ensure you are in your `venv`**.
+2.  **Run Streamlit from the root folder:**
+    ```bash
+    .\venv\Scripts\python.exe -m streamlit run streamlit_app/app.py
+    ```
 
 ---
 
@@ -68,48 +67,58 @@ The entire pipeline and all analysis are contained within a single Jupyter Noteb
 
 **(Deployed Streamlit URL: [LINK-TO-YOUR-DEPLOYED-APP-HERE])**
 
-(Once we build and deploy the Streamlit app, you will paste the public URL here.)
-
 ---
 
 ## 🧠 Key Decisions & Project Rationale
 
-This project involved several key decisions to move beyond the baseline requirements and build a more robust, professional-grade pipeline.
-
-### 1. Parsing: `lxml` over `html.parser`
-While `BeautifulSoup` can use Python's built-in `html.parser`, I explicitly chose the `lxml` parser. It is written in C and is significantly faster and more resilient to malformed HTML, which is critical for a web-scale data pipeline.
-
-### 2. Embeddings: `S-BERT` over `TF-IDF`
-The assignment allowed for `TF-IDF` vectors for similarity. I chose to use `sentence-transformers` (S-BERT) instead.
-* **Why?** TF-IDF is a "bag-of-words" model; it knows *if* a word exists but not *what it means*. It would fail to see "How to improve SEO" and "Tips for getting better at SEO" as similar.
-* **S-BERT** is a deep learning model that understands *semantic meaning* and *context*. This provides a vastly superior and more human-like duplicate detection capability.
-
-### 3. Preprocessing: Minimalist by Design
-I intentionally avoided aggressive preprocessing (like stopword removal or stemming) on the main text.
-* **Why?** Our key features, **Readability Scores** (`textstat`) and **Semantic Embeddings** (`S-BERT`), depend on natural, grammatically correct language. Removing stopwords or stemming would corrupt these features and lead to a far less accurate model.
-
-### 4. Model Selection: The "Goldilocks" Problem
-This was the most critical part of the project. The synthetic, rule-based labels created a "trap."
-
-* **Baseline (Random Forest):** A test with `RandomForestClassifier` (a suggested model) achieved **1.00 (100%) accuracy**. On a tiny, rule-based dataset, this is a clear sign of **overfitting**. The model was simply "memorizing" the exact rules I wrote, not "learning" a general pattern.
-* **Baseline (Logistic Regression):** This model **underfit** the data, achieving only a **0.44 F1-Score** for the 'Medium' class. It was too simple to capture the "catch-all" nature of this class.
-
-* **✅ Solution (SVC):** I chose a **Support Vector Classifier (SVC) with an RBF kernel**. This is the "Goldilocks" model for this problem. It is powerful enough to find complex, non-linear boundaries (unlike Logistic Regression) but can be controlled with `C` and `gamma` parameters (unlike Random Forest) to prevent overfitting.
-
-### 5. Feature Engineering: The Key to Unlocking SVC
-The SVC model alone wasn't enough. It needed better features to solve the 'Medium' class problem. I engineered three new, highly-informative features:
-* `gunning_fog`: Measures word complexity (grade level).
-* `avg_sentence_length`: A proxy for writing style.
-* `readability_length_interaction`: A new feature (`flesch_score * word_count`) that captures the relationship between length and quality.
-
-### 6. Validation: `GridSearchCV` + `5-Fold CV`
-A single 70/30 split on 69 rows is unreliable. To find the best, most trustworthy model, I used `GridSearchCV` to test all parameter combinations, validating each one with **5-Fold Cross-Validation**. This gives a robust average score and ensures the final model isn't just a "lucky split."
+* **Embeddings: `S-BERT` over `TF-IDF`**. I chose `Sentence-Transformers` because they understand *semantic meaning*, not just keywords. This allows the tool to find articles that "mean" the same thing, which is a far superior method for duplicate detection.
+* **Preprocessing: Minimalist by Design**. I intentionally avoided aggressive text cleaning (like stopword removal) because our key features (Readability scores and S-BERT embeddings) *require* natural, grammatically correct language to function accurately.
+* **Model Selection: `SVC` over `RandomForest/LogisticRegression`**. This was the most critical decision.
+    * `Logistic Regression` **underfit** and failed to identify the 'Medium' class (0.44 F1-Score).
+    * `Random Forest` **overfit** and "memorized" the simple, rule-based labels, giving an untrustworthy 100% accuracy.
+    * `SVC (Support Vector Classifier)` provided the perfect "Goldilocks" balance. It's powerful enough to find the complex non-linear patterns of the 'Medium' class but was controlled via tuning to prevent overfitting, resulting in a robust, realistic model.
+* **Feature Engineering: The Key to Performance**. The model's success in finding the 'Medium' class (0.71 F1-score) was a direct result of engineering new features like `gunning_fog` and `readability_length_interaction`, which provided signals beyond simple word count.
+* **Validation: `GridSearchCV` + `5-Fold CV`**. A single 70/30 split on a small dataset is unreliable. I used 5-Fold Cross-Validation with a GridSearch to find the best, most trustworthy model parameters.
 
 ---
 
 ## 📊 Results Summary
 
-The final tuned `SVC` model (our "Goldilocks" model) performed exceptionally well, demonstrating a clear ability to distinguish between the nuanced classes and crushing the baseline.
+The final tuned `SVC` model demonstrated strong performance, significantly beating the baseline and proving its ability to handle the nuanced, imbalanced classes.
+
+### Duplicate Detection
+* **Duplicate Pairs Found:** 10
+* **Example:**
+    | url1 | url2 | similarity |
+    | :--- | :--- | :--- |
+    | `https://ma...` | `https://en...` | 0.85915 |
+    | `https://en...` | `https://sin...` | 0.846509 |
+    | `https://en...` | `https://sin...` | 0.841784 |
+
 
 ### Model Performance (Tuned SVC on 70/30 Split):
 
+| Class | Precision | Recall | F1-Score | Support |
+| :--- | :--- | :--- | :--- | :--- |
+| **Low Quality** | 0.91 | 0.83 | 0.87 | 12 |
+| **Medium Quality**| 0.71 | 0.71 | 0.71 | 7 |
+| **High Quality** | 0.67 | 1.00 | 0.80 | 2 |
+
+---
+**Overall Accuracy:** 0.81
+<br>
+**Baseline Accuracy:** 0.71
+
+
+### Top 3 Most Important Features:
+1.  `readability_length_interaction` (importance: 0.264)
+2.  `word_count` (importance: 0.228)
+3.  `flesch_reading_ease` (importance: 0.194)
+
+---
+
+## ⚠️ Limitations
+
+* **Tiny Dataset:** With only ~69 rows, the model is "data starved." Its performance is promising but would be greatly improved with more training data.
+* **Synthetic Labels:** The quality labels were rule-based. A production model would need to be trained on labels from human SEO experts.
+* **Real-Time Similarity:** The `similar_to` function **only** compares a new URL against the original ~60 articles in the `features.csv` dataset, not the entire internet.
