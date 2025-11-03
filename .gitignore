@@ -3,4 +3,4 @@ venv/
 .env/
 
 # === NLTK data ===
-nltk_data/
+# nltk_data/
