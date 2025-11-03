@@ -1,0 +1,25 @@
+# File: requirements.txt
+
+# Core Data Handling
+pandas==2.1.3
+numpy==1.26.1
+
+# HTML Parsing & Scraping
+beautifulsoup4==4.12.2
+lxml==4.9.3
+requests==2.31.0
+
+# NLP & Feature Engineering
+nltk==3.8.1
+textstat==0.7.3
+scikit-learn==1.3.2
+sentence-transformers==2.2.2
+
+# Model saving
+joblib==1.3.2
+
+# Streamlit
+streamlit==1.28.2
+
+# Utilities
+tqdm==4.66.1
