@@ -65,7 +65,7 @@ To run the interactive web demo locally:
 
 ## 🌟 Deployed Streamlit App (Bonus)
 
-**(Deployed Streamlit URL: [LINK-TO-YOUR-DEPLOYED-APP-HERE])**
+**(Deployed Streamlit URL: https://seocontentqualityduplicatedetector-gcvc3r4guwr2zdqshbpnvt.streamlit.app/ )**
 
 ---
 
