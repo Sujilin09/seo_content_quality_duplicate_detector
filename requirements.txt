@@ -6,7 +6,7 @@ numpy==1.26.1
 
 # HTML Parsing & Scraping
 beautifulsoup4==4.12.2
-lxml==4.9.3
+lxml  # <-- THIS IS THE FIX
 requests==2.31.0
 
 # NLP & Feature Engineering
