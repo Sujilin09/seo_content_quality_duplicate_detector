@@ -22,4 +22,4 @@ joblib
 streamlit
 
 # Utilities
-tqdm
+tqdm==4.66.1
